@@ -3,38 +3,33 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-// Use the REDIS_URL directly from the environment variables
-const redisUrl = process.env.REDIS_URL;
-
-if (!redisUrl) {
-  console.error('REDIS_URL is not defined. Ensure it is set in the environment variables.');
-  process.exit(1);
-}
+// Build the Redis URL from environment variables
+const redisHost = process.env.REDIS_HOST || 'redis';
+const redisPort = process.env.REDIS_PORT || '6379';
+const redisPassword = process.env.REDIS_PASSWORD ? `:${process.env.REDIS_PASSWORD}@` : '';
+const redisUrl = `redis://${redisPassword}${redisHost}:${redisPort}`;
 
 console.log(`Connecting to Redis at ${redisUrl}`);
 
-// Create the Redis client using the connection URL with TLS
 const client = createClient({
   url: redisUrl,
   socket: {
-    tls: true,
-    rejectUnauthorized: false, // Bypass certificate validation (needed for Railway)
+    tls: false,
+  },
+});
+
+client.on('connect', () => console.log('Connected to Redis'));
+client.on('error', (err) => console.error('Redis Error:', err));
+
+// Connect to Redis
+(async () => {
+  try {
+    await client.connect();
+    console.log('Successfully connected to Redis!');
+  } catch (error) {
+    console.error('Failed to connect to Redis:', error);
+    process.exit(1);
   }
-});
-
-client.on('error', (err) => {
-  console.error('Redis Error:', err);
-});
-
-client.on('connect', () => {
-  console.log('Connected to Redis');
-});
-
-try {
-  await client.connect();
-} catch (err) {
-  console.error('Failed to connect to Redis:', err);
-  process.exit(1); // Exit the app if Redis connection fails
-}
+})();
 
 export default client;
