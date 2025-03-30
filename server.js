@@ -13,7 +13,8 @@ app.use(smsRoutes);
 
 
 const PORT = process.env.PORT || 8000;
-app.listen(PORT, () => console.log(`Server is running on http://localhost:${PORT}`));
+const HOST = process.env.HOST || '0.0.0.0';
+app.listen(PORT, HOST, () => console.log(`Server is running on http://${HOST}:${PORT}`));
 
 
 export { app }
