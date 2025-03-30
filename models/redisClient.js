@@ -3,14 +3,24 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-// Ensure required environment variables are available
-const redisHost = process.env.REDIS_HOST || 'redis';
-const redisPort = process.env.REDIS_PORT || '6379';
-const redisUrl = `redis://${redisHost}:${redisPort}`;
+// Use the REDIS_URL directly from the environment variables
+const redisUrl = process.env.REDIS_URL;
+
+if (!redisUrl) {
+  console.error('REDIS_URL is not defined. Ensure it is set in the environment variables.');
+  process.exit(1);
+}
 
 console.log(`Connecting to Redis at ${redisUrl}`);
 
-const client = createClient({ url: redisUrl });
+// Create the Redis client using the connection URL with TLS
+const client = createClient({
+  url: redisUrl,
+  socket: {
+    tls: true,
+    rejectUnauthorized: false, // Bypass certificate validation (needed for Railway)
+  }
+});
 
 client.on('error', (err) => {
   console.error('Redis Error:', err);
