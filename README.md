@@ -179,5 +179,5 @@ docker exec -it sms-service-postgres-1 psql -U admin -d sms_service
 ## 🏁 **Conclusion**
 You’re all set to run and test the SMS service API. If you have any issues, check the logs using Docker or verify your API requests using Postman.
 
-Happy coding! 😊
+
 
