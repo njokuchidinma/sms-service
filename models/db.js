@@ -15,7 +15,7 @@ const pool = new Pool({
     database: process.env.DB_NAME,
     connectionString: process.env.DATABASE_URL,
     ssl: {
-        rejectUnauthorized: false, // Set to true if you have proper SSL certs
+        rejectUnauthorized: false // Set to true if you have proper SSL certs
     }
 });
 
