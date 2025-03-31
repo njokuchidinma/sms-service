@@ -12,7 +12,10 @@ This is a microservice API that handles inbound and outbound SMS using Redis and
 - Dockerized environment for easy setup
 - Unit and Integration Tests using `node:test`
 
-
+##Server Url
+Url for live server: https://sms-service-production-0d86.up.railway.app
+Url for Inbound sms: https://sms-service-production-0d86.up.railway.app/inbound/sms/
+Url for Outbound sms: https://sms-service-production-0d86.up.railway.app/outbound/sms/
 
 ## 🚀 **Getting Started**
 
