@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 // Build the Redis URL from environment variables
-const redisHost = process.env.REDIS_HOST || 'redis';
+const redisHost = process.env.REDIS_HOST || 'redis' || 'localhost';
 const redisPort = process.env.REDIS_PORT || '6379';
 const redisPassword = process.env.REDIS_PASSWORD ? `:${process.env.REDIS_PASSWORD}@` : '';
 const redisUrl = `redis://${redisPassword}${redisHost}:${redisPort}`;

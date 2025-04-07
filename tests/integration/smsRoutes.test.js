@@ -1,16 +1,36 @@
-import test from 'node:test';
+import test, { beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
 import request from 'supertest';
 import { app } from '../../server.js';
-import pool from '../../models/db.js';
 import client from '../../models/redisClient.js';
+import sequelize from '../../models/sequelize.js';
+import Account from '../../models/Account.js';
+import PhoneNumber from '../../models/PhoneNumber.js';
 
-// Mock Database and Redis
-pool.query = async () => ({ rowCount: 1, rows: [{ id: 1 }] });
-client.get = async () => null;
-client.set = async () => null;
+const AUTH_USERNAME = 'azr1';
+const AUTH_PASSWORD = '20S0KPNOIM';
+const authHeader = { Authorization: 'Basic ' + Buffer.from(`${AUTH_USERNAME}:${AUTH_PASSWORD}`).toString('base64') };
 
-const authHeader = { Authorization: 'Basic ' + Buffer.from('azr1:20S0KPNOIM').toString('base64') };
+beforeEach(async () => {
+  await sequelize.sync();
+
+  await Account.findOrCreate({
+    where: { username: AUTH_USERNAME },
+    defaults: { auth_id: AUTH_PASSWORD }
+  });
+
+  await PhoneNumber.findOrCreate({
+    where: { number: '3253280311' },
+    defaults: { account_id: 1 }
+  });
+
+  await PhoneNumber.findOrCreate({
+    where: { number: '3253280312' },
+    defaults: { account_id: 1 }
+  });
+
+  await client.flushAll();
+});
 
 test('POST /inbound/sms/ - Successful Request', async () => {
   const response = await request(app)
@@ -23,7 +43,12 @@ test('POST /inbound/sms/ - Successful Request', async () => {
 });
 
 test('POST /outbound/sms/ - Blocked by STOP', async () => {
-  client.get = async () => 'blocked'; // Simulating STOP
+  // Send a real STOP message to block future outbound
+  await request(app)
+    .post('/inbound/sms/')
+    .set(authHeader)
+    .send({ from: '3253280312', to: '3253280311', text: 'STOP' });
+
   const response = await request(app)
     .post('/outbound/sms/')
     .set(authHeader)

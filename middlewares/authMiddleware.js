@@ -1,5 +1,5 @@
 import basicAuth from 'basic-auth';
-import pool from '../models/db.js';
+import Account from '../models/Account.js';
 
 
 async function authenticate(req, res, next) {
@@ -12,14 +12,13 @@ async function authenticate(req, res, next) {
     const { name: username, pass: auth_id } = credentials;
 
     try {
-        const query = 'SELECT * FROM account WHERE username = $1 AND auth_id = $2';
-        const result = await pool.query(query, [username, auth_id]);
+        const account = await Account.findOne({ where: { username,  auth_id } });
 
-        if (result.rowCount === 0) {
+        if (!account) {
             return res.status(403).json({ message: '', error: 'Authentication failed' });
         }
 
-        req.account = result.rows[0];
+        req.account = account;
         next();
     } catch(error) {
         console.error('Authentication Error:', error);
